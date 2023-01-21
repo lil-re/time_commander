@@ -1,17 +1,15 @@
 package main
 
 import (
-  "fmt"
   "os"
+  "fmt"
+  "time"
+  "io/ioutil"
+  "encoding/json"
   "github.com/spf13/cobra"
 )
 
 func main() {
-  // now := time.Now()
-  // unix := now.Unix()
-  // format := now.Format("02 Jan 2006")
-  // fmt.Printf("Coucou %v", unix)
-  // fmt.Printf("Coucou %v", format)
   Execute()
 }
 
@@ -65,10 +63,57 @@ func Execute() {
 */
 func startAction () {
   fmt.Println("startAction")
+  records := getRecords()
+
+  if (len(records) > 0) {
+    record := &records[len(records) - 1]
+
+    now := time.Now()
+    date := now.Format("2006-01-02")
+
+    if (date != record.Date) {
+      newSessions := make([]Session, 1)
+      newSessions[0].Start = getCurrentTimestamp()
+      newRecord := Record{
+        Date: date,
+        Sessions: newSessions,
+      }
+      records = append(records, newRecord)
+    } else if len(record.Sessions) > 0 {
+      session := &record.Sessions[len(record.Sessions) - 1]
+
+      if session.End == 0  {
+        fmt.Println("Session has already started")
+      } else {
+        newSession := Session{
+          Start: getCurrentTimestamp(),
+          End: 0,
+        }
+        record.Sessions = append(record.Sessions, newSession)
+      }
+    }
+    setRecords(records)
+  }
 }
 
 func stopAction () {
   fmt.Println("stopAction")
+  records := getRecords()
+
+  if (len(records) > 0) {
+    record := &records[len(records) - 1]
+      
+    if len(record.Sessions) > 0 {
+      session := &record.Sessions[len(record.Sessions) - 1]
+
+      if session.End == 0  {
+        session.End = getCurrentTimestamp()
+        setRecords(records)
+      } else {
+        fmt.Println("Session is already stopped")
+      }
+    }
+  }
 }
 
 func todayAction () {
@@ -80,9 +125,56 @@ func reportAction () {
 }
 
 /*
+** Structures
+*/
+type TimeCommanderData struct {
+  Records []Record `json:"records"`
+}
+
+type Record struct {
+	Date     string    `json:"date"`
+	Sessions []Session `json:"sessions"`
+}
+
+type Session struct {
+	Start int64 `json:"start"`
+	End   int64 `json:"end"`
+}
+
+/*
+** Files
+*/
+func getRecords () []Record {
+  jsonFile, err := os.Open("time.json")
+  handleError(err)
+
+  defer jsonFile.Close()
+
+  byteValue, err := ioutil.ReadAll(jsonFile)
+  handleError(err)
+
+  var data TimeCommanderData
+  json.Unmarshal(byteValue, &data)
+  return data.Records
+}
+
+func setRecords (records []Record) {
+  data := TimeCommanderData{ Records: records }
+  jsonData, err := json.MarshalIndent(data, "", "  ")
+  handleError(err)
+  
+  _ = ioutil.WriteFile("time.json", jsonData, 0644)
+}
+
+/*
 ** Utils
 */
- func handleError(err error) {
+func getCurrentTimestamp () int64 {
+  now := time.Now()
+  return now.Unix()
+}
+
+func handleError(err error) {
   if err != nil {
       panic(err)
   }
