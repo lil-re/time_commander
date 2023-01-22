@@ -7,7 +7,7 @@ import (
 )
 
 /*
-** Initialization
+** Commands
 */
 var Filename string
 var Start bool
@@ -15,7 +15,7 @@ var Stop bool
 var Today bool
 var Report int
 
-var Command = &cobra.Command{
+var Commands = &cobra.Command{
   Use:   "time",
   Short: "Time Commander",
   Long: "Time Commander | Generate time sheets in your terminal",
@@ -32,15 +32,15 @@ var Command = &cobra.Command{
   },
 }
 
-func Initialize() {
+func InitializeCommands() {
   dir, err := os.Getwd()
   HandleError(err)
 
   Filename = fmt.Sprintf("%v\\time_commander.json", dir)
   HandleNoFile(Filename)
 
-  Command.PersistentFlags().BoolVarP(&Start, "start", "a", false, "Set the starting time")
-  Command.PersistentFlags().BoolVarP(&Stop, "stop", "z", false, "Set the ending time")
-  Command.PersistentFlags().BoolVarP(&Today, "today", "t", false, "Display a report for today")
-  Command.PersistentFlags().IntVarP(&Report, "report", "r", 7, "Display a report for the last X days")
+  Commands.PersistentFlags().BoolVarP(&Start, "go", "g", false, "Set the starting time")
+  Commands.PersistentFlags().BoolVarP(&Stop, "stop", "s", false, "Set the ending time")
+  Commands.PersistentFlags().BoolVarP(&Today, "today", "t", false, "Display a report for today")
+  Commands.PersistentFlags().IntVarP(&Report, "report", "r", 7, "Display a report for the last X days")
 }

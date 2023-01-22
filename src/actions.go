@@ -25,17 +25,19 @@ func StartAction () {
 		  Sessions: newSessions,
 		}
 		records = append(records, newRecord)
+		fmt.Println("Session has been started")
 	  } else if len(record.Sessions) > 0 {
 		session := &record.Sessions[len(record.Sessions) - 1]
   
 		if session.End == 0  {
-		  fmt.Println("Session has already started")
+		  fmt.Println("Session has already been started")
 		} else {
 		  newSession := Session{
 			Start: GetCurrentTimestamp(),
 			End: 0,
 		  }
 		  record.Sessions = append(record.Sessions, newSession)
+		  fmt.Println("Session has been started")
 		}
 	  }
 	  SetFileData(records)
@@ -54,6 +56,7 @@ func StopAction () {
 		if session.End == 0  {
 		  session.End = GetCurrentTimestamp()
 		  SetFileData(records)
+		  fmt.Println("Session has been stopped")
 		} else {
 		  fmt.Println("Session is already stopped")
 		}
@@ -82,7 +85,7 @@ func TodayAction () {
   
 		textDuration := fmt.Sprintf("%vs", floatDuration)
 		parsedDuration, _ := time.ParseDuration(textDuration)
-		fmt.Printf("\n %v", parsedDuration)
+		fmt.Printf("Today => %v\n", parsedDuration)
 	  } else {
 		fmt.Println("There is no Record today")
 	  }

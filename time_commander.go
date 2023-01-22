@@ -1,9 +1,10 @@
 package main
 
 import (
-  "github.com/lil-re/time-commander/src"
+  "./src"
 )
 
 func main() {
-  src.Command.Execute()
+  src.InitializeCommands()
+  src.Commands.Execute()
 }
