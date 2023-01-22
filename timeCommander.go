@@ -43,7 +43,7 @@ func init() {
   dir, err := os.Getwd()
   handleError(err)
 
-  filename = fmt.Sprintf("%v\\time.txt", dir)
+  filename = fmt.Sprintf("%v\\time.json", dir)
   handleNoFile()
 
   rootCmd.PersistentFlags().BoolVarP(&start, "start", "a", false, "Set the starting time")
@@ -63,7 +63,7 @@ func Execute() {
 */
 func startAction () {
   fmt.Println("startAction")
-  records := getRecords()
+  records := getFileData()
 
   if (len(records) > 0) {
     record := &records[len(records) - 1]
@@ -92,13 +92,13 @@ func startAction () {
         record.Sessions = append(record.Sessions, newSession)
       }
     }
-    setRecords(records)
+    setFileData(records)
   }
 }
 
 func stopAction () {
   fmt.Println("stopAction")
-  records := getRecords()
+  records := getFileData()
 
   if (len(records) > 0) {
     record := &records[len(records) - 1]
@@ -108,7 +108,7 @@ func stopAction () {
 
       if session.End == 0  {
         session.End = getCurrentTimestamp()
-        setRecords(records)
+        setFileData(records)
       } else {
         fmt.Println("Session is already stopped")
       }
@@ -117,11 +117,58 @@ func stopAction () {
 }
 
 func todayAction () {
-  fmt.Println("todayAction")
+  records := getFileData()
+
+  if (len(records) > 0) {
+    record := records[len(records) - 1]
+
+    now := time.Now()
+    date := now.Format("2006-01-02")
+
+    if (date == record.Date) {
+      floatDuration := 0.0
+
+      for i := 0; i < len(record.Sessions); i++ {
+        session := record.Sessions[i]
+        start := time.Unix(session.Start, 0)
+        end := time.Unix(session.End, 0)
+        floatDuration = floatDuration + end.Sub(start).Seconds()
+      }
+
+      textDuration := fmt.Sprintf("%vs", floatDuration)
+      parsedDuration, _ := time.ParseDuration(textDuration)
+      fmt.Printf("\n %v", parsedDuration)
+    } else {
+      fmt.Println("There is no Record today")
+    }
+  }
 }
 
 func reportAction () {
-  fmt.Println("reportAction")
+  records := getFileData()
+  recordCounter := len(records)
+  recordLimit := recordCounter - report - 1
+
+  if (recordCounter > 0) {
+    floatDuration := 0.0
+
+    for i := recordCounter - 1; i > recordLimit; i-- {
+      record := records[i]
+
+      for j := 0; j < len(record.Sessions); j++ {
+        session := record.Sessions[j]
+        start := time.Unix(session.Start, 0)
+        end := time.Unix(session.End, 0)
+        floatDuration = floatDuration + end.Sub(start).Seconds()
+      }
+    }
+
+    textDuration := fmt.Sprintf("%vs", floatDuration)
+    parsedDuration, _ := time.ParseDuration(textDuration)
+    fmt.Printf("\n %v", parsedDuration)
+  } else {
+    fmt.Println("There is no Record")
+  }
 }
 
 /*
@@ -144,8 +191,8 @@ type Session struct {
 /*
 ** Files
 */
-func getRecords () []Record {
-  jsonFile, err := os.Open("time.json")
+func getFileData () []Record {
+  jsonFile, err := os.Open(filename)
   handleError(err)
 
   defer jsonFile.Close()
@@ -158,12 +205,12 @@ func getRecords () []Record {
   return data.Records
 }
 
-func setRecords (records []Record) {
+func setFileData (records []Record) {
   data := TimeCommanderData{ Records: records }
   jsonData, err := json.MarshalIndent(data, "", "  ")
   handleError(err)
   
-  _ = ioutil.WriteFile("time.json", jsonData, 0644)
+  _ = ioutil.WriteFile(filename, jsonData, 0644)
 }
 
 /*
@@ -182,6 +229,7 @@ func handleError(err error) {
 
 func handleNoFile() {
   _, err := os.Open(filename)
+
   if err != nil {
       os.Create(filename)
   }
