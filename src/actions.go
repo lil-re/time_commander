@@ -18,12 +18,7 @@ func StartAction () {
 	  date := now.Format("2006-01-02")
   
 	  if (date != record.Date) {
-		newSessions := make([]Session, 1)
-		newSessions[0].Start = GetCurrentTimestamp()
-		newRecord := Record{
-		  Date: date,
-		  Sessions: newSessions,
-		}
+		newRecord := getNewRecord(date)
 		records = append(records, newRecord)
 		fmt.Println("Session has been started")
 	  } else if len(record.Sessions) > 0 {
@@ -32,10 +27,7 @@ func StartAction () {
 		if session.End == 0  {
 		  fmt.Println("Session has already been started")
 		} else {
-		  newSession := Session{
-			Start: GetCurrentTimestamp(),
-			End: 0,
-		  }
+		  newSession := getNewSession()
 		  record.Sessions = append(record.Sessions, newSession)
 		  fmt.Println("Session has been started")
 		}
@@ -77,15 +69,9 @@ func TodayAction () {
 		floatDuration := 0.0
   
 		for i := 0; i < len(record.Sessions); i++ {
-		  session := record.Sessions[i]
-		  start := time.Unix(session.Start, 0)
-		  end := time.Unix(session.End, 0)
-		  floatDuration = floatDuration + end.Sub(start).Seconds()
+			floatDuration += getSessionDuration(record.Sessions[i])
 		}
-  
-		textDuration := fmt.Sprintf("%vs", floatDuration)
-		parsedDuration, _ := time.ParseDuration(textDuration)
-		fmt.Printf("Today => %v\n", parsedDuration)
+		printRecord("Today", floatDuration)
 	  } else {
 		fmt.Println("There is no Record today")
 	  }
@@ -104,16 +90,39 @@ func ReportAction () {
 		floatDuration := 0.0
   
 		for j := 0; j < len(record.Sessions); j++ {
-		  session := record.Sessions[j]
-		  start := time.Unix(session.Start, 0)
-		  end := time.Unix(session.End, 0)
-		  floatDuration = floatDuration + end.Sub(start).Seconds()
+			floatDuration += getSessionDuration(record.Sessions[j])
 		}
-		textDuration := fmt.Sprintf("%vs", floatDuration)
-		parsedDuration, _ := time.ParseDuration(textDuration)
-		fmt.Printf("%v => %v\n", record.Date, parsedDuration)
+		printRecord(record.Date, floatDuration)
 	  }
 	} else {
 	  fmt.Println("There is no Record")
 	}
+}
+
+func getNewRecord (date string) Record {
+	newSessions := make([]Session, 1)
+	newSessions[0].Start = GetCurrentTimestamp()
+	return Record{
+		Date: date,
+		Sessions: newSessions,
+	}
+}
+
+func getNewSession () Session {
+	return Session{
+		Start: GetCurrentTimestamp(),
+		End: 0,
+	}
+}
+
+func getSessionDuration (session Session) float64  {
+	start := time.Unix(session.Start, 0)
+	end := time.Unix(session.End, 0)
+	return end.Sub(start).Seconds()
+}
+
+func printRecord (date string, floatDuration float64) {
+	textDuration := fmt.Sprintf("%vs", floatDuration)
+	parsedDuration, _ := time.ParseDuration(textDuration)
+	fmt.Printf("%v => %v\n", date, parsedDuration)
 }
