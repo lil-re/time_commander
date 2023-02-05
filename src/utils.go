@@ -3,6 +3,8 @@ package src
 import (
 	"os"
 	"time"
+	"io/ioutil"
+	"encoding/json"
 )
 
 /*
@@ -24,5 +26,10 @@ func HandleNoFile(filename string) {
 
 	if err != nil {
 		os.Create(filename)
+		data := TimeCommanderData{ Records: make([]Record, 0) }
+		jsonData, err := json.MarshalIndent(data, "", "  ")
+		HandleError(err)
+		
+		_ = ioutil.WriteFile(Filename, jsonData, 0644)
 	}
 }

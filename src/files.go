@@ -3,6 +3,7 @@ package src
 
 import (
 	"os"
+	"fmt"
 	"io/ioutil"
 	"encoding/json"
 )
@@ -22,6 +23,7 @@ func GetFileData () []Record {
   
 	var data TimeCommanderData
 	json.Unmarshal(byteValue, &data)
+	fmt.Printf("%v \n", data)
 	return data.Records
 }
 

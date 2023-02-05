@@ -10,12 +10,15 @@ import (
 */
 func StartAction () {
 	records := GetFileData()
+	now := time.Now()
+	date := now.Format("2006-01-02")
   
-	if (len(records) > 0) {
+	if (len(records) == 0) {
+		newRecord := getNewRecord(date)
+		records = append(records, newRecord)
+		fmt.Println("Session has been started")
+	} else {
 	  record := &records[len(records) - 1]
-  
-	  now := time.Now()
-	  date := now.Format("2006-01-02")
   
 	  if (date != record.Date) {
 		newRecord := getNewRecord(date)
@@ -32,8 +35,8 @@ func StartAction () {
 		  fmt.Println("Session has been started")
 		}
 	  }
-	  SetFileData(records)
 	}
+	SetFileData(records)
 }
   
 func StopAction () {
@@ -53,6 +56,8 @@ func StopAction () {
 		  fmt.Println("Session is already stopped")
 		}
 	  }
+	} else {
+		fmt.Println("There is no Record")
 	}
 }
   

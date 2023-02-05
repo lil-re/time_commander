@@ -36,7 +36,7 @@ func InitializeCommands() {
   dir, err := os.Getwd()
   HandleError(err)
 
-  Filename = fmt.Sprintf("%v\\time_commander.json", dir)
+  Filename = fmt.Sprintf("%v/time_commander.json", dir)
   HandleNoFile(Filename)
 
   Commands.PersistentFlags().BoolVarP(&Start, "go", "g", false, "Set the starting time")
