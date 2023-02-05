@@ -1,7 +1,7 @@
 package main
 
 import (
-  "./src"
+  "github.com/lil-re/time_commander/src"
 )
 
 func main() {
