@@ -65,12 +65,7 @@ func TodayAction() {
 		date := now.Format("2006-01-02")
 
 		if date == record.Date {
-			floatDuration := 0.0
-
-			for i := 0; i < len(record.Sessions); i++ {
-				floatDuration += getSessionDuration(record.Sessions[i])
-			}
-			printRecord("Today", floatDuration)
+			printRecord(record, "Today")
 		} else {
 			fmt.Println("There is no Record today")
 		}
@@ -85,13 +80,7 @@ func ReportAction() {
 	if recordCounter > 0 {
 
 		for i := recordCounter - 1; i > recordLimit; i-- {
-			record := records[i]
-			floatDuration := 0.0
-
-			for j := 0; j < len(record.Sessions); j++ {
-				floatDuration += getSessionDuration(record.Sessions[j])
-			}
-			printRecord(record.Date, floatDuration)
+			printRecord(records[i], records[i].Date)
 		}
 	} else {
 		fmt.Println("There is no Record")
@@ -120,11 +109,24 @@ func createNewSession(record *Record) {
 
 func getSessionDuration(session Session) float64 {
 	start := time.Unix(session.Start, 0)
-	end := time.Unix(session.End, 0)
+	var end time.Time
+
+	if session.End == 0 {
+		end = time.Unix(GetCurrentTimestamp(), 0)
+	} else {
+		end = time.Unix(session.End, 0)
+	}
+
 	return end.Sub(start).Seconds()
 }
 
-func printRecord(date string, floatDuration float64) {
+func printRecord(record Record, date string) {
+	floatDuration := 0.0
+
+	for j := 0; j < len(record.Sessions); j++ {
+		floatDuration += getSessionDuration(record.Sessions[j])
+	}
+
 	textDuration := fmt.Sprintf("%vs", floatDuration)
 	parsedDuration, _ := time.ParseDuration(textDuration)
 	fmt.Printf("%v => %v\n", date, parsedDuration)
