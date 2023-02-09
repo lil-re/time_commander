@@ -24,7 +24,7 @@ func StartAction() {
 			session := &record.Sessions[len(record.Sessions)-1]
 
 			if session.End == 0 {
-				fmt.Println("Session has already been started")
+				SessionHasAlreadyBeenStarted()
 			} else {
 				createNewSession(record)
 			}
@@ -45,13 +45,13 @@ func StopAction() {
 			if session.End == 0 {
 				session.End = GetCurrentTimestamp()
 				SetFileData(records)
-				fmt.Println("Session has been stopped")
+				SessionHasBeenStopped()
 			} else {
-				fmt.Println("Session is already stopped")
+				SessionIsAlreadyStopped()
 			}
 		}
 	} else {
-		fmt.Println("There is no Record")
+		NoRecord()
 	}
 }
 
@@ -60,14 +60,13 @@ func TodayAction() {
 
 	if len(records) > 0 {
 		record := records[len(records)-1]
-
 		now := time.Now()
 		date := now.Format("2006-01-02")
 
 		if date == record.Date {
 			printRecord(record, "Today")
 		} else {
-			fmt.Println("There is no Record today")
+			NoRecordToday()
 		}
 	}
 }
@@ -78,12 +77,11 @@ func ReportAction() {
 	recordLimit := recordCounter - Report - 1
 
 	if recordCounter > 0 {
-
 		for i := recordCounter - 1; i > recordLimit; i-- {
 			printRecord(records[i], records[i].Date)
 		}
 	} else {
-		fmt.Println("There is no Record")
+		NoRecord()
 	}
 }
 
@@ -95,7 +93,7 @@ func createNewRecord(records *[]Record, date string) {
 		Sessions: newSessions,
 	}
 	*records = append(*records, newRecord)
-	fmt.Println("Session has been started")
+	SessionHasBeenStarted()
 }
 
 func createNewSession(record *Record) {
@@ -104,7 +102,7 @@ func createNewSession(record *Record) {
 		End:   0,
 	}
 	record.Sessions = append(record.Sessions, newSession)
-	fmt.Println("Session has been started")
+	SessionHasBeenStarted()
 }
 
 func getSessionDuration(session Session) float64 {
