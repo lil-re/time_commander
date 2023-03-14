@@ -46,6 +46,7 @@ func StopAction() {
 				session.End = GetCurrentTimestamp()
 				SetFileData(records)
 				SessionHasBeenStopped()
+				TodayAction()
 			} else {
 				SessionIsAlreadyStopped()
 			}
