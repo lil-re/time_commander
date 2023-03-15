@@ -75,7 +75,11 @@ func TodayAction() {
 func ReportAction() {
 	records := GetFileData()
 	recordCounter := len(records)
-	recordLimit := recordCounter - Report - 1
+	recordLimit := -1
+
+	if Report <= recordCounter {
+		recordLimit = recordCounter - Report - 1
+	}
 
 	if recordCounter > 0 {
 		for i := recordCounter - 1; i > recordLimit; i-- {
